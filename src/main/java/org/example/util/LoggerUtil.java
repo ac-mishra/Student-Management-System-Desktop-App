@@ -1,0 +1,35 @@
+package org.example.util;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class LoggerUtil {
+
+    private LoggerUtil() {
+    }
+
+    public static void log(
+            String message
+    ) {
+
+        System.out.println(
+
+                "[" +
+
+                        LocalDateTime.now().format(
+
+                                DateTimeFormatter.ofPattern(
+                                        "dd-MM-yyyy HH:mm:ss"
+                                )
+
+                        )
+
+                        + "] "
+
+                        + message
+
+        );
+
+    }
+
+}
