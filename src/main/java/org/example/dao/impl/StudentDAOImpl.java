@@ -1,19 +1,27 @@
 package org.example.dao.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.config.ConnectionPool;
 import org.example.dao.StudentDAO;
 import org.example.model.Student;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StudentDAOImpl implements StudentDAO {
 
-    @Override
-    public boolean addStudent(Student student) {
+    private static final Logger logger =
+            LogManager.getLogger(StudentDAOImpl.class);
 
-        String sql = """
+    private static final String INSERT_STUDENT = """
             INSERT INTO students
             (
                 roll_no,
@@ -34,414 +42,47 @@ public class StudentDAOImpl implements StudentDAO {
             )
             """;
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            connection = ConnectionPool.getConnection();
-
-            connection.setAutoCommit(false);
-
-            preparedStatement = connection.prepareStatement(
-                    sql,
-                    Statement.RETURN_GENERATED_KEYS
-            );
-
-            preparedStatement.setString(1, student.getRollNo());
-
-            preparedStatement.setString(2, student.getFirstName());
-
-            preparedStatement.setString(3, student.getLastName());
-
-            preparedStatement.setString(4, student.getGender());
-
-            preparedStatement.setDate(
-                    5,
-                    Date.valueOf(student.getDob())
-            );
-
-            preparedStatement.setString(6, student.getEmail());
-
-            preparedStatement.setString(7, student.getPhone());
-
-            preparedStatement.setString(8, student.getAddress());
-
-            preparedStatement.setInt(9, student.getDepartmentId());
-
-            preparedStatement.setDate(
-                    10,
-                    Date.valueOf(student.getAdmissionDate())
-            );
-
-            preparedStatement.setString(11, student.getStatus());
-
-            int rows = preparedStatement.executeUpdate();
-
-            if (rows > 0) {
-
-                ResultSet generatedKeys =
-                        preparedStatement.getGeneratedKeys();
-
-                if (generatedKeys.next()) {
-
-                    student.setStudentId(generatedKeys.getInt(1));
-
-                }
-
-                connection.commit();
-
-                return true;
-            }
-
-            connection.rollback();
-
-        }
-        catch (Exception e) {
-
-            try {
-
-                if (connection != null)
-                    connection.rollback();
-
-            }
-            catch (SQLException ex) {
-
-                ex.printStackTrace();
-
-            }
-
-            e.printStackTrace();
-        }
-        finally {
-
-            try {
-
-                if (preparedStatement != null)
-                    preparedStatement.close();
-
-                if (connection != null)
-                    connection.close();
-
-            }
-            catch (SQLException e) {
-
-                e.printStackTrace();
-
-            }
-
-        }
-
-        return false;
-
-    }
-
-    @Override
-    public boolean updateStudent(Student student) {
-
-        String sql = """
+    private static final String UPDATE_STUDENT = """
             UPDATE students
             SET
-                roll_no = ?,
-                first_name = ?,
-                last_name = ?,
-                gender = ?,
-                dob = ?,
-                email = ?,
-                phone = ?,
-                address = ?,
-                department_id = ?,
-                admission_date = ?,
-                status = ?
-            WHERE student_id = ?
+                roll_no=?,
+                first_name=?,
+                last_name=?,
+                gender=?,
+                dob=?,
+                email=?,
+                phone=?,
+                address=?,
+                department_id=?,
+                admission_date=?,
+                status=?
+            WHERE student_id=?
             """;
 
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-
-            connection = ConnectionPool.getConnection();
-
-            connection.setAutoCommit(false);
-
-            preparedStatement = connection.prepareStatement(sql);
-
-            preparedStatement.setString(1, student.getRollNo());
-
-            preparedStatement.setString(2, student.getFirstName());
-
-            preparedStatement.setString(3, student.getLastName());
-
-            preparedStatement.setString(4, student.getGender());
-
-            preparedStatement.setDate(5,
-                    Date.valueOf(student.getDob()));
-
-            preparedStatement.setString(6,
-                    student.getEmail());
-
-            preparedStatement.setString(7,
-                    student.getPhone());
-
-            preparedStatement.setString(8,
-                    student.getAddress());
-
-            preparedStatement.setInt(9,
-                    student.getDepartmentId());
-
-            preparedStatement.setDate(10,
-                    Date.valueOf(student.getAdmissionDate()));
-
-            preparedStatement.setString(11,
-                    student.getStatus());
-
-            preparedStatement.setInt(12,
-                    student.getStudentId());
-
-            int rows = preparedStatement.executeUpdate();
-
-            if (rows > 0) {
-
-                connection.commit();
-
-                return true;
-
-            }
-
-            connection.rollback();
-
-        } catch (Exception e) {
-
-            try {
-
-                if (connection != null) {
-
-                    connection.rollback();
-
-                }
-
-            } catch (SQLException ex) {
-
-                ex.printStackTrace();
-
-            }
-
-            e.printStackTrace();
-
-        } finally {
-
-            try {
-
-                if (preparedStatement != null)
-                    preparedStatement.close();
-
-                if (connection != null)
-                    connection.close();
-
-            } catch (SQLException e) {
-
-                e.printStackTrace();
-
-            }
-
-        }
-
-        return false;
-
-    }
-
-    @Override
-    public boolean deleteStudent(int studentId) {
-
-        String sql = """
+    private static final String DELETE_STUDENT = """
             DELETE FROM students
-            WHERE student_id = ?
+            WHERE student_id=?
             """;
 
-        try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql)
-        ) {
-
-            preparedStatement.setInt(1, studentId);
-
-            return preparedStatement.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return false;
-    }
-
-    @Override
-    public Student getStudentById(int studentId) {
-
-        String sql = """
+    private static final String GET_BY_ID = """
             SELECT *
             FROM students
-            WHERE student_id = ?
+            WHERE student_id=?
             """;
 
-        try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql)
-        ) {
-
-            preparedStatement.setInt(1, studentId);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-                if (resultSet.next()) {
-
-                    Student student = new Student();
-
-                    student.setStudentId(resultSet.getInt("student_id"));
-                    student.setRollNo(resultSet.getString("roll_no"));
-                    student.setFirstName(resultSet.getString("first_name"));
-                    student.setLastName(resultSet.getString("last_name"));
-                    student.setGender(resultSet.getString("gender"));
-
-                    Date dob = resultSet.getDate("dob");
-                    if (dob != null) {
-                        student.setDob(dob.toLocalDate());
-                    }
-
-                    student.setEmail(resultSet.getString("email"));
-                    student.setPhone(resultSet.getString("phone"));
-                    student.setAddress(resultSet.getString("address"));
-                    student.setDepartmentId(resultSet.getInt("department_id"));
-
-                    Date admissionDate = resultSet.getDate("admission_date");
-                    if (admissionDate != null) {
-                        student.setAdmissionDate(admissionDate.toLocalDate());
-                    }
-
-                    student.setStatus(resultSet.getString("status"));
-
-                    return student;
-                }
-
-            }
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-    }
-    @Override
-    public Student getStudentByRollNo(String rollNo) {
-
-        String sql = """
+    private static final String GET_BY_ROLL = """
             SELECT *
             FROM students
-            WHERE roll_no = ?
+            WHERE roll_no=?
             """;
 
-        try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql)
-        ) {
-
-            preparedStatement.setString(1, rollNo);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-                if (resultSet.next()) {
-
-                    return mapResultSetToStudent(resultSet);
-
-                }
-
-            }
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-
-    }
-
-    @Override
-    public List<Student> getAllStudents() {
-
-        List<Student> studentList = new ArrayList<>();
-
-        String sql = """
+    private static final String GET_ALL = """
             SELECT *
             FROM students
             ORDER BY student_id
             """;
 
-        try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                ResultSet resultSet = preparedStatement.executeQuery()
-        ) {
-
-            while (resultSet.next()) {
-
-                Student student = new Student();
-
-                student.setStudentId(resultSet.getInt("student_id"));
-
-                student.setRollNo(resultSet.getString("roll_no"));
-
-                student.setFirstName(resultSet.getString("first_name"));
-
-                student.setLastName(resultSet.getString("last_name"));
-
-                student.setGender(resultSet.getString("gender"));
-
-                Date dob = resultSet.getDate("dob");
-                if (dob != null) {
-                    student.setDob(dob.toLocalDate());
-                }
-
-                student.setEmail(resultSet.getString("email"));
-
-                student.setPhone(resultSet.getString("phone"));
-
-                student.setAddress(resultSet.getString("address"));
-
-                student.setDepartmentId(resultSet.getInt("department_id"));
-
-                Date admissionDate = resultSet.getDate("admission_date");
-                if (admissionDate != null) {
-                    student.setAdmissionDate(admissionDate.toLocalDate());
-                }
-
-                student.setStatus(resultSet.getString("status"));
-
-                studentList.add(student);
-
-            }
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return studentList;
-
-    }
-
-    @Override
-    public List<Student> searchStudents(String keyword) {
-
-        List<Student> studentList = new ArrayList<>();
-
-        String sql = """
+    private static final String SEARCH = """
             SELECT *
             FROM students
             WHERE
@@ -453,106 +94,549 @@ public class StudentDAOImpl implements StudentDAO {
             ORDER BY student_id
             """;
 
+    private static final String EXISTS = """
+            SELECT COUNT(*)
+            FROM students
+            WHERE roll_no=?
+            """;
+
+    @Override
+    public boolean addStudent(Student student) {
+
         try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql)
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                INSERT_STUDENT,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+
         ) {
 
-            String search = "%" + keyword + "%";
+            connection.setAutoCommit(false);
 
-            preparedStatement.setString(1, search);
-            preparedStatement.setString(2, search);
-            preparedStatement.setString(3, search);
-            preparedStatement.setString(4, search);
-            preparedStatement.setString(5, search);
+            ps.setString(1, student.getRollNo());
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            ps.setString(2, student.getFirstName());
 
-                while (resultSet.next()) {
+            ps.setString(3, student.getLastName());
 
-                    studentList.add(mapResultSetToStudent(resultSet));
+            ps.setString(4, student.getGender());
 
-                }
+            if (student.getDob() != null) {
+
+                ps.setDate(
+                        5,
+                        Date.valueOf(student.getDob())
+                );
+
+            } else {
+
+                ps.setNull(
+                        5,
+                        Types.DATE
+                );
 
             }
 
-        } catch (SQLException e) {
+            ps.setString(6, student.getEmail());
 
-            e.printStackTrace();
+            ps.setString(7, student.getPhone());
+
+            ps.setString(8, student.getAddress());
+
+            ps.setInt(9, student.getDepartmentId());
+
+            if (student.getAdmissionDate() != null) {
+
+                ps.setDate(
+                        10,
+                        Date.valueOf(student.getAdmissionDate())
+                );
+
+            } else {
+
+                ps.setNull(
+                        10,
+                        Types.DATE
+                );
+
+            }
+
+            ps.setString(11, student.getStatus());
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+
+                try (ResultSet rs =
+                             ps.getGeneratedKeys()) {
+
+                    if (rs.next()) {
+
+                        student.setStudentId(
+                                rs.getInt(1)
+                        );
+
+                    }
+
+                }
+
+                connection.commit();
+
+                connection.setAutoCommit(true);
+
+                return true;
+
+            }
+
+            connection.rollback();
+
+            connection.setAutoCommit(true);
 
         }
 
-        return studentList;
+        catch (Exception e) {
 
-    }
-
-    @Override
-    public boolean studentExists(String rollNo) {
-
-        String sql = """
-            SELECT COUNT(*)
-            FROM students
-            WHERE roll_no = ?
-            """;
-
-        try (
-                Connection connection = ConnectionPool.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sql)
-        ) {
-
-            preparedStatement.setString(1, rollNo);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-                if (resultSet.next()) {
-
-                    return resultSet.getInt(1) > 0;
-
-                }
-
-            }
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
+            logger.error(
+                    "Unable to add student.",
+                    e
+            );
 
         }
 
         return false;
 
     }
-    private Student mapResultSetToStudent(ResultSet resultSet) throws SQLException {
+    @Override
+    public boolean updateStudent(Student student) {
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                UPDATE_STUDENT
+                        )
+
+        ) {
+
+            connection.setAutoCommit(false);
+
+            ps.setString(1, student.getRollNo());
+
+            ps.setString(2, student.getFirstName());
+
+            ps.setString(3, student.getLastName());
+
+            ps.setString(4, student.getGender());
+
+            if (student.getDob() != null) {
+
+                ps.setDate(
+                        5,
+                        Date.valueOf(student.getDob())
+                );
+
+            } else {
+
+                ps.setNull(
+                        5,
+                        Types.DATE
+                );
+
+            }
+
+            ps.setString(6, student.getEmail());
+
+            ps.setString(7, student.getPhone());
+
+            ps.setString(8, student.getAddress());
+
+            ps.setInt(9, student.getDepartmentId());
+
+            if (student.getAdmissionDate() != null) {
+
+                ps.setDate(
+                        10,
+                        Date.valueOf(student.getAdmissionDate())
+                );
+
+            } else {
+
+                ps.setNull(
+                        10,
+                        Types.DATE
+                );
+
+            }
+
+            ps.setString(11, student.getStatus());
+
+            ps.setInt(12, student.getStudentId());
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+
+                connection.commit();
+
+                connection.setAutoCommit(true);
+
+                return true;
+
+            }
+
+            connection.rollback();
+
+            connection.setAutoCommit(true);
+
+        }
+
+        catch (Exception e) {
+
+            logger.error(
+                    "Unable to update student.",
+                    e
+            );
+
+        }
+
+        return false;
+
+    }
+
+    @Override
+    public boolean deleteStudent(int studentId) {
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                DELETE_STUDENT
+                        )
+
+        ) {
+
+            ps.setInt(1, studentId);
+
+            return ps.executeUpdate() > 0;
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to delete student.",
+                    e
+            );
+
+        }
+
+        return false;
+
+    }
+
+    @Override
+    public Student getStudentById(int studentId) {
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                GET_BY_ID
+                        )
+
+        ) {
+
+            ps.setInt(1, studentId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+
+                    return mapResultSetToStudent(rs);
+
+                }
+
+            }
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to fetch student by id.",
+                    e
+            );
+
+        }
+
+        return null;
+
+    }
+    @Override
+    public Student getStudentByRollNo(String rollNo) {
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                GET_BY_ROLL
+                        )
+
+        ) {
+
+            ps.setString(1, rollNo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+
+                    return mapResultSetToStudent(rs);
+
+                }
+
+            }
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to fetch student by roll number.",
+                    e
+            );
+
+        }
+
+        return null;
+
+    }
+
+    @Override
+    public List<Student> getAllStudents() {
+
+        List<Student> students =
+                new ArrayList<>();
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                GET_ALL
+                        );
+
+                ResultSet rs =
+                        ps.executeQuery()
+
+        ) {
+
+            while (rs.next()) {
+
+                students.add(
+                        mapResultSetToStudent(rs)
+                );
+
+            }
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to load students.",
+                    e
+            );
+
+        }
+
+        return students;
+
+    }
+
+    @Override
+    public List<Student> searchStudents(String keyword) {
+
+        List<Student> students =
+                new ArrayList<>();
+
+        String search =
+                "%" + keyword + "%";
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                SEARCH
+                        )
+
+        ) {
+
+            ps.setString(1, search);
+
+            ps.setString(2, search);
+
+            ps.setString(3, search);
+
+            ps.setString(4, search);
+
+            ps.setString(5, search);
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    students.add(
+                            mapResultSetToStudent(rs)
+                    );
+
+                }
+
+            }
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to search students.",
+                    e
+            );
+
+        }
+
+        return students;
+
+    }
+    @Override
+    public boolean studentExists(String rollNo) {
+
+        try (
+
+                Connection connection =
+                        ConnectionPool.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(
+                                EXISTS
+                        )
+
+        ) {
+
+            ps.setString(1, rollNo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+
+                    return rs.getInt(1) > 0;
+
+                }
+
+            }
+
+        }
+
+        catch (SQLException e) {
+
+            logger.error(
+                    "Unable to check whether student exists.",
+                    e
+            );
+
+        }
+
+        return false;
+
+    }
+
+    private Student mapResultSetToStudent(ResultSet rs)
+            throws SQLException {
 
         Student student = new Student();
 
-        student.setStudentId(resultSet.getInt("student_id"));
-        student.setRollNo(resultSet.getString("roll_no"));
-        student.setFirstName(resultSet.getString("first_name"));
-        student.setLastName(resultSet.getString("last_name"));
-        student.setGender(resultSet.getString("gender"));
+        student.setStudentId(
+                rs.getInt("student_id")
+        );
 
-        Date dob = resultSet.getDate("dob");
+        student.setRollNo(
+                rs.getString("roll_no")
+        );
+
+        student.setFirstName(
+                rs.getString("first_name")
+        );
+
+        student.setLastName(
+                rs.getString("last_name")
+        );
+
+        student.setGender(
+                rs.getString("gender")
+        );
+
+        Date dob = rs.getDate("dob");
 
         if (dob != null) {
 
-            student.setDob(dob.toLocalDate());
+            student.setDob(
+                    dob.toLocalDate()
+            );
 
         }
 
-        student.setEmail(resultSet.getString("email"));
-        student.setPhone(resultSet.getString("phone"));
-        student.setAddress(resultSet.getString("address"));
-        student.setDepartmentId(resultSet.getInt("department_id"));
+        student.setEmail(
+                rs.getString("email")
+        );
 
-        Date admissionDate = resultSet.getDate("admission_date");
+        student.setPhone(
+                rs.getString("phone")
+        );
+
+        student.setAddress(
+                rs.getString("address")
+        );
+
+        student.setDepartmentId(
+                rs.getInt("department_id")
+        );
+
+        Date admissionDate =
+                rs.getDate("admission_date");
 
         if (admissionDate != null) {
 
-            student.setAdmissionDate(admissionDate.toLocalDate());
+            student.setAdmissionDate(
+                    admissionDate.toLocalDate()
+            );
 
         }
 
-        student.setStatus(resultSet.getString("status"));
+        student.setStatus(
+                rs.getString("status")
+        );
 
         return student;
 
