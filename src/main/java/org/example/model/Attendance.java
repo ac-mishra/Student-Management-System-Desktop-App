@@ -79,13 +79,9 @@ public class Attendance {
 
     @Override
     public String toString() {
-        return "Attendance{" +
-                "attendanceId=" + attendanceId +
-                ", studentId=" + studentId +
-                ", courseId=" + courseId +
-                ", attendanceDate=" + attendanceDate +
-                ", status='" + status + '\'' +
-                '}';
+
+        return attendanceDate + " - " + status;
+
     }
 
     @Override

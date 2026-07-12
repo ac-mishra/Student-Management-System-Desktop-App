@@ -9,6 +9,8 @@ import org.example.ui.theme.AppColors;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import org.example.service.DepartmentService;
+import org.example.service.impl.DepartmentServiceImpl;
 
 public class CourseFormPanel extends JPanel {
 
@@ -29,6 +31,8 @@ public class CourseFormPanel extends JPanel {
     private DangerButton btnDelete;
     private SecondaryButton btnClear;
     private PrimaryButton btnRefresh;
+    private final DepartmentService departmentService =
+            new DepartmentServiceImpl();
 
     public CourseFormPanel() {
 
@@ -147,26 +151,26 @@ public class CourseFormPanel extends JPanel {
 
         cmbDepartment.removeAllItems();
 
-        /*
-         * Temporary Data
-         * Later this will come from DepartmentService
-         */
+        try {
 
-        Department d1 = new Department();
-        d1.setDepartmentId(1);
-        d1.setDepartmentName("Computer Science");
+            for (Department department :
+                    departmentService.getAllDepartments()) {
 
-        Department d2 = new Department();
-        d2.setDepartmentId(2);
-        d2.setDepartmentName("Information Technology");
+                cmbDepartment.addItem(department);
 
-        Department d3 = new Department();
-        d3.setDepartmentId(3);
-        d3.setDepartmentName("Mechanical");
+            }
 
-        cmbDepartment.addItem(d1);
-        cmbDepartment.addItem(d2);
-        cmbDepartment.addItem(d3);
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load departments.\n"
+                            + e.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 

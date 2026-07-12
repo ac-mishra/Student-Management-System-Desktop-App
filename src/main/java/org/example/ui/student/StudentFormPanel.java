@@ -4,6 +4,16 @@ import org.example.ui.component.*;
 import org.example.ui.theme.AppColors;
 
 import javax.swing.*;
+import org.example.service.DepartmentService;
+import org.example.service.impl.DepartmentServiceImpl;
+
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.border.TitledBorder;
+
+import java.awt.FlowLayout;
+import java.awt.Font;
+
 
 public class StudentFormPanel extends JPanel {
 
@@ -41,6 +51,9 @@ public class StudentFormPanel extends JPanel {
     private DangerButton btnDelete;
     private SecondaryButton btnClear;
     private PrimaryButton btnRefresh;
+    private final DepartmentService departmentService =
+            new DepartmentServiceImpl();
+
 
     public StudentFormPanel() {
 
@@ -239,8 +252,13 @@ public class StudentFormPanel extends JPanel {
 
         btnClear.addActionListener(e -> clearForm());
 
-        btnRefresh.addActionListener(e -> loadDepartments());
+        btnRefresh.addActionListener(e -> {
 
+            loadDepartments();
+
+            clearForm();
+
+        });
     }
 
     public void clearForm() {
@@ -275,37 +293,33 @@ public class StudentFormPanel extends JPanel {
 
     }
 
-    public void loadDepartments() {
 
-        cmbDepartment.removeAllItems();
-
-        /*
-This will be loaded from DepartmentService.
-
-Temporary data:
-*/
-
-        Department d1 = new Department();
-        d1.setDepartmentId(1);
-        d1.setDepartmentName("Computer Science");
-
-        Department d2 = new Department();
-        d2.setDepartmentId(2);
-        d2.setDepartmentName("Information Technology");
-
-        Department d3 = new Department();
-        d3.setDepartmentId(3);
-        d3.setDepartmentName("Mechanical");
-
-        cmbDepartment.addItem(d1);
-
-        cmbDepartment.addItem(d2);
-
-        cmbDepartment.addItem(d3);
-    }
     public String getRollNo() {
 
         return txtRollNo.getText().trim();
+
+    }
+
+    private void loadDepartments() {
+
+        cmbDepartment.removeAllItems();
+
+        try {
+
+            departmentService
+                    .getAllDepartments()
+                    .forEach(cmbDepartment::addItem);
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load departments.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 
@@ -376,11 +390,21 @@ Temporary data:
 
     public String getStatus() {
 
-        return cmbStatus.getSelectedItem().toString();
+        Object selected = cmbStatus.getSelectedItem();
+
+        return selected == null ? "" : selected.toString();
 
     }
 
     public void setStudent(org.example.model.Student student) {
+
+        if (student == null) {
+
+            clearForm();
+
+            return;
+
+        }
 
         txtRollNo.setText(student.getRollNo());
 
@@ -398,28 +422,49 @@ Temporary data:
 
             rbMale.setSelected(true);
 
-        } else {
+        } else if ("Female".equalsIgnoreCase(student.getGender())) {
 
             rbFemale.setSelected(true);
+
+        } else {
+
+            genderGroup.clearSelection();
+
+        }
+
+        for (int i = 0; i < cmbDepartment.getItemCount(); i++) {
+
+            Department department = cmbDepartment.getItemAt(i);
+
+            if (department.getDepartmentId() == student.getDepartmentId()) {
+
+                cmbDepartment.setSelectedIndex(i);
+
+                break;
+
+            }
 
         }
 
         if (student.getDob() != null) {
 
-            spDob.setValue(student.getDob());
+            spDob.setValue(
+                    java.sql.Date.valueOf(student.getDob())
+            );
 
         }
 
         if (student.getAdmissionDate() != null) {
 
-            spAdmissionDate.setValue(student.getAdmissionDate());
+            spAdmissionDate.setValue(
+                    java.sql.Date.valueOf(student.getAdmissionDate())
+            );
 
         }
 
         cmbStatus.setSelectedItem(student.getStatus());
 
     }
-
     public SuccessButton getBtnAdd() {
 
         return btnAdd;

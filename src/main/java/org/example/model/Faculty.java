@@ -82,13 +82,7 @@ public class Faculty {
 
     @Override
     public String toString() {
-        return "Faculty{" +
-                "facultyId=" + facultyId +
-                ", facultyName='" + facultyName + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", departmentId=" + departmentId +
-                '}';
+        return facultyName;
     }
 
     @Override

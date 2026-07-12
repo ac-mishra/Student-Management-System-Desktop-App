@@ -10,6 +10,10 @@ import org.example.ui.theme.AppColors;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import org.example.service.StudentService;
+import org.example.service.CourseService;
+import org.example.service.impl.StudentServiceImpl;
+import org.example.service.impl.CourseServiceImpl;
 
 public class MarksFormPanel extends JPanel {
 
@@ -35,6 +39,11 @@ public class MarksFormPanel extends JPanel {
     private DangerButton btnDelete;
     private SecondaryButton btnClear;
     private PrimaryButton btnRefresh;
+    private final StudentService studentService =
+            new StudentServiceImpl();
+
+    private final CourseService courseService =
+            new CourseServiceImpl();
 
     public MarksFormPanel() {
 
@@ -182,6 +191,8 @@ public class MarksFormPanel extends JPanel {
 
             loadCourses();
 
+            clearForm();
+
         });
 
         txtInternal.addActionListener(e -> calculateTotal());
@@ -284,21 +295,22 @@ public class MarksFormPanel extends JPanel {
 
         cmbStudent.removeAllItems();
 
-        Student s1 = new Student();
-        s1.setStudentId(1);
-        s1.setRollNo("CS24001");
-        s1.setFirstName("Amrit");
-        s1.setLastName("Mishra");
+        try {
 
-        Student s2 = new Student();
-        s2.setStudentId(2);
-        s2.setRollNo("CS24002");
-        s2.setFirstName("Rahul");
-        s2.setLastName("Kumar");
+            studentService
+                    .getAllStudents()
+                    .forEach(cmbStudent::addItem);
 
-        cmbStudent.addItem(s1);
+        } catch (Exception ex) {
 
-        cmbStudent.addItem(s2);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load students.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 
@@ -306,19 +318,22 @@ public class MarksFormPanel extends JPanel {
 
         cmbCourse.removeAllItems();
 
-        Course c1 = new Course();
-        c1.setCourseId(1);
-        c1.setCourseCode("CS101");
-        c1.setCourseName("Programming in Java");
+        try {
 
-        Course c2 = new Course();
-        c2.setCourseId(2);
-        c2.setCourseCode("CS102");
-        c2.setCourseName("Database Management");
+            courseService
+                    .getAllCourses()
+                    .forEach(cmbCourse::addItem);
 
-        cmbCourse.addItem(c1);
+        } catch (Exception ex) {
 
-        cmbCourse.addItem(c2);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load courses.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 
@@ -415,50 +430,63 @@ public class MarksFormPanel extends JPanel {
         );
 
     }
-
     public Student getStudent() {
 
-        return (Student) cmbStudent.getSelectedItem();
+        Object selected = cmbStudent.getSelectedItem();
+
+        return selected instanceof Student
+                ? (Student) selected
+                : null;
 
     }
 
     public Course getCourse() {
 
-        return (Course) cmbCourse.getSelectedItem();
+        Object selected = cmbCourse.getSelectedItem();
+
+        return selected instanceof Course
+                ? (Course) selected
+                : null;
 
     }
 
     public int getSemester() {
 
-        return (Integer) cmbSemester.getSelectedItem();
+        Integer semester = (Integer) cmbSemester.getSelectedItem();
+
+        return semester == null ? 1 : semester;
 
     }
 
     public double getInternalMarks() {
 
-        if (txtInternal.getText().isBlank()) {
+        try {
+
+            return txtInternal.getText().isBlank()
+                    ? 0
+                    : Double.parseDouble(txtInternal.getText());
+
+        } catch (NumberFormatException ex) {
 
             return 0;
 
         }
-
-        return Double.parseDouble(
-                txtInternal.getText()
-        );
 
     }
 
     public double getExternalMarks() {
 
-        if (txtExternal.getText().isBlank()) {
+        try {
+
+            return txtExternal.getText().isBlank()
+                    ? 0
+                    : Double.parseDouble(txtExternal.getText());
+
+        } catch (NumberFormatException ex) {
 
             return 0;
 
         }
-
-        return Double.parseDouble(
-                txtExternal.getText()
-        );
 
     }
 

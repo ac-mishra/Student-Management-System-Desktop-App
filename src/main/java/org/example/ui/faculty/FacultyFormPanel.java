@@ -9,6 +9,8 @@ import org.example.ui.theme.AppColors;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import org.example.service.DepartmentService;
+import org.example.service.impl.DepartmentServiceImpl;
 
 public class FacultyFormPanel extends JPanel {
 
@@ -28,6 +30,8 @@ public class FacultyFormPanel extends JPanel {
     private DangerButton btnDelete;
     private SecondaryButton btnClear;
     private PrimaryButton btnRefresh;
+    private final DepartmentService departmentService =
+            new DepartmentServiceImpl();
 
     public FacultyFormPanel() {
 
@@ -131,36 +135,35 @@ public class FacultyFormPanel extends JPanel {
 
         btnClear.addActionListener(e -> clearForm());
 
-        btnRefresh.addActionListener(e -> loadDepartments());
+        btnRefresh.addActionListener(e -> {
 
+            loadDepartments();
+
+            clearForm();
+
+        });
     }
 
     private void loadDepartments() {
 
         cmbDepartment.removeAllItems();
 
-        /*
-         * Temporary Data
-         * Later this will come from DepartmentService
-         */
+        try {
 
-        Department d1 = new Department();
-        d1.setDepartmentId(1);
-        d1.setDepartmentName("Computer Science");
+            departmentService
+                    .getAllDepartments()
+                    .forEach(cmbDepartment::addItem);
 
-        Department d2 = new Department();
-        d2.setDepartmentId(2);
-        d2.setDepartmentName("Information Technology");
+        } catch (Exception ex) {
 
-        Department d3 = new Department();
-        d3.setDepartmentId(3);
-        d3.setDepartmentName("Mechanical");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load departments.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
 
-        cmbDepartment.addItem(d1);
-
-        cmbDepartment.addItem(d2);
-
-        cmbDepartment.addItem(d3);
+        }
 
     }
 
@@ -181,6 +184,7 @@ public class FacultyFormPanel extends JPanel {
         txtFacultyName.requestFocus();
 
     }
+
     public void setFaculty(Faculty faculty) {
 
         if (faculty == null) {
@@ -191,24 +195,18 @@ public class FacultyFormPanel extends JPanel {
 
         }
 
-        txtFacultyName.setText(
-                faculty.getFacultyName()
-        );
+        txtFacultyName.setText(faculty.getFacultyName());
 
-        txtEmail.setText(
-                faculty.getEmail()
-        );
+        txtEmail.setText(faculty.getEmail());
 
-        txtPhone.setText(
-                faculty.getPhone()
-        );
+        txtPhone.setText(faculty.getPhone());
 
         for (int i = 0; i < cmbDepartment.getItemCount(); i++) {
 
             Department department = cmbDepartment.getItemAt(i);
 
-            if (department.getDepartmentId() ==
-                    faculty.getDepartmentId()) {
+            if (department.getDepartmentId()
+                    == faculty.getDepartmentId()) {
 
                 cmbDepartment.setSelectedIndex(i);
 
@@ -219,6 +217,7 @@ public class FacultyFormPanel extends JPanel {
         }
 
     }
+
     public String getFacultyName() {
 
         return txtFacultyName.getText().trim();
@@ -239,7 +238,15 @@ public class FacultyFormPanel extends JPanel {
 
     public Department getDepartment() {
 
-        return (Department) cmbDepartment.getSelectedItem();
+        Object selected = cmbDepartment.getSelectedItem();
+
+        if (selected instanceof Department) {
+
+            return (Department) selected;
+
+        }
+
+        return null;
 
     }
 

@@ -12,6 +12,10 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.time.ZoneId;
 import java.util.Date;
+import org.example.service.StudentService;
+import org.example.service.CourseService;
+import org.example.service.impl.StudentServiceImpl;
+import org.example.service.impl.CourseServiceImpl;
 
 public class AttendanceFormPanel extends JPanel {
 
@@ -31,6 +35,11 @@ public class AttendanceFormPanel extends JPanel {
     private DangerButton btnDelete;
     private SecondaryButton btnClear;
     private PrimaryButton btnRefresh;
+    private final StudentService studentService =
+            new StudentServiceImpl();
+
+    private final CourseService courseService =
+            new CourseServiceImpl();
 
     public AttendanceFormPanel() {
 
@@ -147,6 +156,8 @@ public class AttendanceFormPanel extends JPanel {
 
             loadCourses();
 
+            clearForm();
+
         });
 
     }
@@ -155,25 +166,22 @@ public class AttendanceFormPanel extends JPanel {
 
         cmbStudent.removeAllItems();
 
-        /*
-         * Temporary Data
-         * Later replace with StudentService.
-         */
+        try {
 
-        Student s1 = new Student();
-        s1.setStudentId(1);
-        s1.setRollNo("CS24001");
-        s1.setFirstName("Amrit");
-        s1.setLastName("Mishra");
+            studentService
+                    .getAllStudents()
+                    .forEach(cmbStudent::addItem);
 
-        Student s2 = new Student();
-        s2.setStudentId(2);
-        s2.setRollNo("CS24002");
-        s2.setFirstName("Rahul");
-        s2.setLastName("Kumar");
+        } catch (Exception ex) {
 
-        cmbStudent.addItem(s1);
-        cmbStudent.addItem(s2);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load students.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 
@@ -181,23 +189,22 @@ public class AttendanceFormPanel extends JPanel {
 
         cmbCourse.removeAllItems();
 
-        /*
-         * Temporary Data
-         * Later replace with CourseService.
-         */
+        try {
 
-        Course c1 = new Course();
-        c1.setCourseId(1);
-        c1.setCourseCode("CS101");
-        c1.setCourseName("Programming in Java");
+            courseService
+                    .getAllCourses()
+                    .forEach(cmbCourse::addItem);
 
-        Course c2 = new Course();
-        c2.setCourseId(2);
-        c2.setCourseCode("CS102");
-        c2.setCourseName("Database Management");
+        } catch (Exception ex) {
 
-        cmbCourse.addItem(c1);
-        cmbCourse.addItem(c2);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load courses.\n" + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
 
     }
 
@@ -222,6 +229,7 @@ public class AttendanceFormPanel extends JPanel {
         cmbStudent.requestFocus();
 
     }
+
     public void setAttendance(Attendance attendance) {
 
         if (attendance == null) {
@@ -236,8 +244,7 @@ public class AttendanceFormPanel extends JPanel {
 
             Student student = cmbStudent.getItemAt(i);
 
-            if (student.getStudentId() ==
-                    attendance.getStudentId()) {
+            if (student.getStudentId() == attendance.getStudentId()) {
 
                 cmbStudent.setSelectedIndex(i);
 
@@ -251,8 +258,7 @@ public class AttendanceFormPanel extends JPanel {
 
             Course course = cmbCourse.getItemAt(i);
 
-            if (course.getCourseId() ==
-                    attendance.getCourseId()) {
+            if (course.getCourseId() == attendance.getCourseId()) {
 
                 cmbCourse.setSelectedIndex(i);
 
@@ -262,33 +268,47 @@ public class AttendanceFormPanel extends JPanel {
 
         }
 
-        cmbStatus.setSelectedItem(
-                attendance.getStatus()
-        );
+        cmbStatus.setSelectedItem(attendance.getStatus());
 
-        spAttendanceDate.setValue(
-                java.sql.Date.valueOf(
-                        attendance.getAttendanceDate()
-                )
-        );
+        if (attendance.getAttendanceDate() != null) {
+
+            spAttendanceDate.setValue(
+                    java.sql.Date.valueOf(
+                            attendance.getAttendanceDate()
+                    )
+            );
+
+        }
 
     }
 
     public Student getStudent() {
 
-        return (Student) cmbStudent.getSelectedItem();
+        Object selected = cmbStudent.getSelectedItem();
+
+        return selected instanceof Student
+                ? (Student) selected
+                : null;
 
     }
 
     public Course getCourse() {
 
-        return (Course) cmbCourse.getSelectedItem();
+        Object selected = cmbCourse.getSelectedItem();
+
+        return selected instanceof Course
+                ? (Course) selected
+                : null;
 
     }
 
     public String getStatus() {
 
-        return (String) cmbStatus.getSelectedItem();
+        Object selected = cmbStatus.getSelectedItem();
+
+        return selected == null
+                ? ""
+                : selected.toString();
 
     }
 

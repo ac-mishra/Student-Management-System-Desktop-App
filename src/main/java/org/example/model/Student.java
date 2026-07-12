@@ -165,20 +165,7 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Student{" +
-                "studentId=" + studentId +
-                ", rollNo='" + rollNo + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", gender='" + gender + '\'' +
-                ", dob=" + dob +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", address='" + address + '\'' +
-                ", departmentId=" + departmentId +
-                ", admissionDate=" + admissionDate +
-                ", status='" + status + '\'' +
-                '}';
+        return rollNo + " - " + firstName + " " + lastName;
     }
 
     @Override

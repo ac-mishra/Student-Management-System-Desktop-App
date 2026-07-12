@@ -11,9 +11,7 @@ import org.example.ui.student.StudentPanel;
 import org.example.ui.theme.AppColors;
 import org.example.ui.theme.AppFonts;
 import org.example.service.DashboardService;
-import org.example.service.impl.DashboardServiceImpl;
-import org.example.ui.component.DashboardCard;
-
+import org.example.ui.dashboard.DashboardHomePanel;
 import javax.swing.*;
 import java.awt.*;
 
@@ -26,11 +24,6 @@ public class DashboardFrame extends JFrame {
     private StatusBar statusBar;
 
     private DashboardService dashboardService;
-
-    private DashboardCard studentCard;
-    private DashboardCard departmentCard;
-    private DashboardCard courseCard;
-    private DashboardCard facultyCard;
 
 
     private CardLayout cardLayout;
@@ -45,15 +38,19 @@ public class DashboardFrame extends JFrame {
 
     private AttendancePanel attendancePanel;
 
+    private DashboardHomePanel dashboardHomePanel;
+
     public DashboardFrame() {
 
-        dashboardService = new DashboardServiceImpl();
+        dashboardService = new DashboardService();
 
         initializeFrame();
 
         initializeComponents();
 
         initializeLayout();
+
+        dashboardHomePanel.refreshDashboard();
 
         registerEvents();
 
@@ -98,7 +95,7 @@ public class DashboardFrame extends JFrame {
         facultyPanel = new FacultyPanel();
 
         attendancePanel = new AttendancePanel();
-
+        dashboardHomePanel = new DashboardHomePanel();
     }
 
     private void initializeLayout() {
@@ -141,6 +138,17 @@ public class DashboardFrame extends JFrame {
         sidebarPanel.add(logo, "center,wrap 20");
 
         SidebarButton btnDashboard = new SidebarButton("Dashboard");
+
+        btnDashboard.addActionListener(e -> {
+
+            dashboardHomePanel.refreshDashboard();
+
+            cardLayout.show(
+                    contentPanel,
+                    "DASHBOARD"
+            );
+
+        });
 
         SidebarButton btnStudents = new SidebarButton("Students");
 
@@ -226,17 +234,40 @@ public class DashboardFrame extends JFrame {
 
         contentPanel.setBackground(AppColors.BACKGROUND);
 
-        contentPanel.add(new JScrollPane(studentPanel), "STUDENT");
+        contentPanel.add(
+                dashboardHomePanel,
+                "DASHBOARD"
+        );
 
-        contentPanel.add(new JScrollPane(departmentPanel), "DEPARTMENT");
+        contentPanel.add(
+                new JScrollPane(studentPanel),
+                "STUDENT"
+        );
 
-        contentPanel.add(new JScrollPane(coursePanel), "COURSE");
+        contentPanel.add(
+                new JScrollPane(departmentPanel),
+                "DEPARTMENT"
+        );
 
-        contentPanel.add(new JScrollPane(facultyPanel), "FACULTY");
+        contentPanel.add(
+                new JScrollPane(coursePanel),
+                "COURSE"
+        );
 
-        contentPanel.add(new JScrollPane(attendancePanel), "ATTENDANCE");
+        contentPanel.add(
+                new JScrollPane(facultyPanel),
+                "FACULTY"
+        );
 
-        cardLayout.show(contentPanel, "STUDENT");
+        contentPanel.add(
+                new JScrollPane(attendancePanel),
+                "ATTENDANCE"
+        );
+
+        cardLayout.show(
+                contentPanel,
+                "DASHBOARD"
+        );
 
     }
     private void registerEvents() {
