@@ -36,23 +36,21 @@ public class DashboardHomePanel extends JPanel {
     private void initializeComponents() {
 
         setBackground(AppColors.BACKGROUND);
+        studentCard = new DashboardCard("Students", "0");
 
-        studentCard = new DashboardCard("Students");
+        departmentCard = new DashboardCard("Departments", "0");
 
-        departmentCard = new DashboardCard("Departments");
+        courseCard = new DashboardCard("Courses", "0");
 
-        courseCard = new DashboardCard("Courses");
+        facultyCard = new DashboardCard("Faculty", "0");
 
-        facultyCard = new DashboardCard("Faculty");
+        attendanceCard = new DashboardCard("Attendance", "0");
 
-        attendanceCard = new DashboardCard("Attendance");
+        marksCard = new DashboardCard("Marks", "0");
 
-        marksCard = new DashboardCard("Marks");
+        averageMarksCard = new DashboardCard("Average Marks", "0.00");
 
-        averageMarksCard = new DashboardCard("Average Marks");
-
-        attendancePercentageCard = new DashboardCard("Attendance %");
-
+        attendancePercentageCard = new DashboardCard("Attendance %", "0.00 %");
     }
 
     private void initializeLayout() {
@@ -87,31 +85,41 @@ public class DashboardHomePanel extends JPanel {
 
             Map<String, Integer> statistics =
                     dashboardService.getDashboardStatistics();
-
             studentCard.setValue(
-                    statistics.getOrDefault("Students", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Students", 0)
+                    )
             );
 
             departmentCard.setValue(
-                    statistics.getOrDefault("Departments", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Departments", 0)
+                    )
             );
 
             courseCard.setValue(
-                    statistics.getOrDefault("Courses", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Courses", 0)
+                    )
             );
 
             facultyCard.setValue(
-                    statistics.getOrDefault("Faculty", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Faculty", 0)
+                    )
             );
 
             attendanceCard.setValue(
-                    statistics.getOrDefault("Attendance", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Attendance", 0)
+                    )
             );
 
             marksCard.setValue(
-                    statistics.getOrDefault("Marks", 0)
+                    String.valueOf(
+                            statistics.getOrDefault("Marks", 0)
+                    )
             );
-
             averageMarksCard.setValue(
                     String.format(
                             "%.2f",

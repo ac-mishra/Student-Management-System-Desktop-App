@@ -12,7 +12,6 @@ public class AttendanceTableModel extends AbstractTableModel {
             "ID",
             "Student ID",
             "Course ID",
-            "Faculty ID",
             "Attendance Date",
             "Status"
     };
@@ -73,11 +72,9 @@ public class AttendanceTableModel extends AbstractTableModel {
 
             case 2 -> attendance.getCourseId();
 
-            case 3 -> attendance.getFacultyId();
+            case 3 -> attendance.getAttendanceDate();
 
-            case 4 -> attendance.getAttendanceDate();
-
-            case 5 -> attendance.getStatus();
+            case 4 -> attendance.getStatus();
 
             default -> "";
 

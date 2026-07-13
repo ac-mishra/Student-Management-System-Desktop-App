@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.util.PasswordUtil.encrypt;
+
 public class UserDAOImpl implements UserDAO {
 
     @Override
@@ -35,8 +37,7 @@ public class UserDAOImpl implements UserDAO {
             ps.setString(1, user.getUsername());
             ps.setString(
                     2,
-                    PasswordUtil.hashPassword(user.getPassword())
-            );            ps.setString(3, user.getRole());
+                    encrypt(user.getPassword())            );            ps.setString(3, user.getRole());
 
             return ps.executeUpdate() > 0;
 
@@ -71,8 +72,7 @@ public class UserDAOImpl implements UserDAO {
 
                 String storedPassword = rs.getString("password");
 
-                if (PasswordUtil.verifyPassword(password, storedPassword)) {
-
+                if (encrypt(password).equals(storedPassword)) {
                     return mapUser(rs);
 
                 }
@@ -297,6 +297,20 @@ public class UserDAOImpl implements UserDAO {
         user.setRole(rs.getString("role"));
 
         return user;
+    }
+    public static String hashPassword(String password) {
+
+        return encrypt(password);
+
+    }
+
+    public static boolean verifyPassword(
+            String password,
+            String hashedPassword
+    ) {
+
+        return encrypt(password).equals(hashedPassword);
+
     }
 
 }

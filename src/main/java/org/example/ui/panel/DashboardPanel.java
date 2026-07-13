@@ -2,7 +2,6 @@ package org.example.ui.panel;
 
 import net.miginfocom.swing.MigLayout;
 import org.example.service.DashboardService;
-import org.example.service.impl.DashboardServiceImpl;
 import org.example.ui.component.DashboardCard;
 import org.example.ui.theme.AppColors;
 
@@ -20,8 +19,7 @@ public class DashboardPanel extends JPanel {
 
     public DashboardPanel() {
 
-        dashboardService = new DashboardServiceImpl();
-
+        dashboardService = new DashboardService();
         initializeComponents();
 
         initializeLayout();
@@ -66,27 +64,29 @@ public class DashboardPanel extends JPanel {
 
     public void loadDashboardData() {
 
+        var statistics = dashboardService.getDashboardStatistics();
+
         studentCard.setValue(
                 String.valueOf(
-                        dashboardService.getTotalStudents()
+                        statistics.getOrDefault("Students", 0)
                 )
         );
 
         departmentCard.setValue(
                 String.valueOf(
-                        dashboardService.getTotalDepartments()
+                        statistics.getOrDefault("Departments", 0)
                 )
         );
 
         courseCard.setValue(
                 String.valueOf(
-                        dashboardService.getTotalCourses()
+                        statistics.getOrDefault("Courses", 0)
                 )
         );
 
         facultyCard.setValue(
                 String.valueOf(
-                        dashboardService.getTotalFaculty()
+                        statistics.getOrDefault("Faculty", 0)
                 )
         );
 

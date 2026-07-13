@@ -67,11 +67,10 @@ public class LoginFrame extends JFrame {
     private void initializeComponents() {
 
         backgroundPanel = new JPanel(new MigLayout(
-                "fill,insets 0",
-                "[grow]",
-                "[grow]"
+                "fill",
+                "[grow,center]",
+                "[grow,center]"
         ));
-
         backgroundPanel.setBackground(AppColors.BACKGROUND);
 
         loginCard = new JPanel(new MigLayout(
@@ -137,7 +136,7 @@ public class LoginFrame extends JFrame {
 
         backgroundPanel.add(
                 loginCard,
-                "align center center,width 420!,height 430!"
+                "center,w 500!,h 470!"
         );
 
         setContentPane(backgroundPanel);

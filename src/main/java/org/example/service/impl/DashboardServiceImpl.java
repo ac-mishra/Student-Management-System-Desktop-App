@@ -7,35 +7,35 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class DashboardServiceImpl implements DashboardService {
+public class DashboardServiceImpl extends DashboardService {
 
-    @Override
-    public int getTotalStudents() {
-
-        return getCount("SELECT COUNT(*) FROM students");
-
-    }
-
-    @Override
-    public int getTotalDepartments() {
-
-        return getCount("SELECT COUNT(*) FROM departments");
-
-    }
-
-    @Override
-    public int getTotalCourses() {
-
-        return getCount("SELECT COUNT(*) FROM courses");
-
-    }
-
-    @Override
-    public int getTotalFaculty() {
-
-        return getCount("SELECT COUNT(*) FROM faculty");
-
-    }
+//    @Override
+//    public int getTotalStudents() {
+//
+//        return getCount("SELECT COUNT(*) FROM students");
+//
+//    }
+//
+//    @Override
+//    public int getTotalDepartments() {
+//
+//        return getCount("SELECT COUNT(*) FROM departments");
+//
+//    }
+//
+//    @Override
+//    public int getTotalCourses() {
+//
+//        return getCount("SELECT COUNT(*) FROM courses");
+//
+//    }
+//
+//    @Override
+//    public int getTotalFaculty() {
+//
+//        return getCount("SELECT COUNT(*) FROM faculty");
+//
+//    }
 
     private int getCount(String sql) {
 

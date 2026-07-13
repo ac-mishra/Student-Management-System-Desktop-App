@@ -7,15 +7,20 @@ import org.example.ui.component.StatusBar;
 import org.example.ui.course.CoursePanel;
 import org.example.ui.department.DepartmentPanel;
 import org.example.ui.faculty.FacultyPanel;
+import org.example.ui.marks.MarksPanel;
+import org.example.ui.reports.ReportsPanel;
 import org.example.ui.student.StudentPanel;
 import org.example.ui.theme.AppColors;
 import org.example.ui.theme.AppFonts;
-import org.example.service.DashboardService;
-import org.example.ui.dashboard.DashboardHomePanel;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class DashboardFrame extends JFrame {
+
+    /*--------------------------------------------------
+                    Layout Components
+     --------------------------------------------------*/
 
     private JPanel sidebarPanel;
     private JPanel headerPanel;
@@ -23,10 +28,22 @@ public class DashboardFrame extends JFrame {
 
     private StatusBar statusBar;
 
-    private DashboardService dashboardService;
-
-
     private CardLayout cardLayout;
+
+    /*--------------------------------------------------
+                     Services
+     --------------------------------------------------*/
+
+
+    /*--------------------------------------------------
+                     Dashboard
+     --------------------------------------------------*/
+
+    private DashboardHomePanel dashboardHomePanel;
+
+    /*--------------------------------------------------
+                     Modules
+     --------------------------------------------------*/
 
     private StudentPanel studentPanel;
 
@@ -38,11 +55,16 @@ public class DashboardFrame extends JFrame {
 
     private AttendancePanel attendancePanel;
 
-    private DashboardHomePanel dashboardHomePanel;
+    private MarksPanel marksPanel;
+
+    private ReportsPanel reportsPanel;
+
+    /*--------------------------------------------------
+                     Constructor
+     --------------------------------------------------*/
 
     public DashboardFrame() {
 
-        dashboardService = new DashboardService();
 
         initializeFrame();
 
@@ -50,27 +72,33 @@ public class DashboardFrame extends JFrame {
 
         initializeLayout();
 
-        dashboardHomePanel.refreshDashboard();
-
         registerEvents();
 
+        refreshDashboard();
         setVisible(true);
 
     }
+    /*--------------------------------------------------
+                Frame Initialization
+ --------------------------------------------------*/
 
     private void initializeFrame() {
 
         setTitle("Student Management System");
 
-        setSize(1400, 850);
-
-        setLocationRelativeTo(null);
-
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+        setMinimumSize(new Dimension(1280, 720));
+
+        setLocationRelativeTo(null);
+
     }
+
+/*--------------------------------------------------
+              Component Initialization
+ --------------------------------------------------*/
 
     private void initializeComponents() {
 
@@ -86,6 +114,8 @@ public class DashboardFrame extends JFrame {
 
         contentPanel = new JPanel(cardLayout);
 
+        dashboardHomePanel = new DashboardHomePanel();
+
         studentPanel = new StudentPanel();
 
         departmentPanel = new DepartmentPanel();
@@ -95,8 +125,15 @@ public class DashboardFrame extends JFrame {
         facultyPanel = new FacultyPanel();
 
         attendancePanel = new AttendancePanel();
-        dashboardHomePanel = new DashboardHomePanel();
+
+        marksPanel = new MarksPanel();
+
+        reportsPanel = new ReportsPanel();
+
     }
+    /*--------------------------------------------------
+                Layout Initialization
+ --------------------------------------------------*/
 
     private void initializeLayout() {
 
@@ -120,7 +157,7 @@ public class DashboardFrame extends JFrame {
 
     private void buildSidebar() {
 
-        sidebarPanel.setPreferredSize(new Dimension(230, 0));
+        sidebarPanel.setPreferredSize(new Dimension(240, 0));
 
         sidebarPanel.setBackground(AppColors.SIDEBAR);
 
@@ -129,7 +166,7 @@ public class DashboardFrame extends JFrame {
                 "[grow]"
         ));
 
-        JLabel logo = new JLabel("SMS");
+        JLabel logo = new JLabel("Student Management System");
 
         logo.setForeground(Color.WHITE);
 
@@ -137,36 +174,35 @@ public class DashboardFrame extends JFrame {
 
         sidebarPanel.add(logo, "center,wrap 20");
 
-        SidebarButton btnDashboard = new SidebarButton("Dashboard");
+        SidebarButton btnDashboard =
+                new SidebarButton("Dashboard");
 
-        btnDashboard.addActionListener(e -> {
+        SidebarButton btnStudents =
+                new SidebarButton("Students");
 
-            dashboardHomePanel.refreshDashboard();
+        SidebarButton btnDepartments =
+                new SidebarButton("Departments");
 
-            cardLayout.show(
-                    contentPanel,
-                    "DASHBOARD"
-            );
+        SidebarButton btnCourses =
+                new SidebarButton("Courses");
 
-        });
+        SidebarButton btnFaculty =
+                new SidebarButton("Faculty");
 
-        SidebarButton btnStudents = new SidebarButton("Students");
+        SidebarButton btnAttendance =
+                new SidebarButton("Attendance");
 
-        SidebarButton btnDepartments = new SidebarButton("Departments");
+        SidebarButton btnMarks =
+                new SidebarButton("Marks");
 
-        SidebarButton btnCourses = new SidebarButton("Courses");
+        SidebarButton btnReports =
+                new SidebarButton("Reports");
 
-        SidebarButton btnFaculty = new SidebarButton("Faculty");
+        SidebarButton btnBackup =
+                new SidebarButton("Backup");
 
-        SidebarButton btnAttendance = new SidebarButton("Attendance");
-
-        SidebarButton btnMarks = new SidebarButton("Marks");
-
-        SidebarButton btnReports = new SidebarButton("Reports");
-
-        SidebarButton btnBackup = new SidebarButton("Backup");
-
-        SidebarButton btnLogout = new SidebarButton("Logout");
+        SidebarButton btnLogout =
+                new SidebarButton("Logout");
 
         sidebarPanel.add(btnDashboard, "growx,wrap");
 
@@ -186,24 +222,71 @@ public class DashboardFrame extends JFrame {
 
         sidebarPanel.add(btnBackup, "growx,wrap");
 
+        sidebarPanel.add(new JLabel(), "push,growy,wrap");
+
         sidebarPanel.add(btnLogout, "growx");
 
+    /*-----------------------------------------
+                Navigation
+     -----------------------------------------*/
+
+        btnDashboard.addActionListener(e -> {
+
+            refreshDashboard();
+
+            showModule("DASHBOARD");
+
+        });
+
         btnStudents.addActionListener(e ->
-                cardLayout.show(contentPanel, "STUDENT"));
+                showModule("STUDENT"));
 
         btnDepartments.addActionListener(e ->
-                cardLayout.show(contentPanel, "DEPARTMENT"));
+                showModule("DEPARTMENT"));
 
         btnCourses.addActionListener(e ->
-                cardLayout.show(contentPanel, "COURSE"));
+                showModule("COURSE"));
 
         btnFaculty.addActionListener(e ->
-                cardLayout.show(contentPanel, "FACULTY"));
+                showModule("FACULTY"));
 
         btnAttendance.addActionListener(e ->
-                cardLayout.show(contentPanel, "ATTENDANCE"));
+                showModule("ATTENDANCE"));
+
+        btnMarks.addActionListener(e ->
+                showModule("MARKS"));
+
+        btnReports.addActionListener(e ->
+                showModule("REPORTS"));
+
+        btnBackup.addActionListener(e -> {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Backup Module Coming Soon"
+            );
+
+        });
+
+        btnLogout.addActionListener(e -> {
+
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to logout?",
+                    "Logout",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (option == JOptionPane.YES_OPTION) {
+
+                dispose();
+
+            }
+
+        });
 
     }
+
     private void buildHeader() {
 
         headerPanel.setPreferredSize(new Dimension(0, 70));
@@ -212,17 +295,31 @@ public class DashboardFrame extends JFrame {
 
         headerPanel.setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("Dashboard");
+        JLabel title = new JLabel("Student Management System");
 
         title.setFont(AppFonts.TITLE);
 
-        title.setBorder(BorderFactory.createEmptyBorder(0,20,0,0));
+        title.setBorder(
+                BorderFactory.createEmptyBorder(
+                        0,
+                        20,
+                        0,
+                        0
+                )
+        );
 
         JLabel user = new JLabel("Welcome, Admin");
 
         user.setFont(AppFonts.NORMAL);
 
-        user.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
+        user.setBorder(
+                BorderFactory.createEmptyBorder(
+                        0,
+                        0,
+                        0,
+                        20
+                )
+        );
 
         headerPanel.add(title, BorderLayout.WEST);
 
@@ -232,10 +329,12 @@ public class DashboardFrame extends JFrame {
 
     private void buildContent() {
 
-        contentPanel.setBackground(AppColors.BACKGROUND);
+        contentPanel.setBackground(
+                AppColors.BACKGROUND
+        );
 
         contentPanel.add(
-                dashboardHomePanel,
+                new JScrollPane(dashboardHomePanel),
                 "DASHBOARD"
         );
 
@@ -264,17 +363,193 @@ public class DashboardFrame extends JFrame {
                 "ATTENDANCE"
         );
 
+        contentPanel.add(
+                new JScrollPane(marksPanel),
+                "MARKS"
+        );
+
+        contentPanel.add(
+                new JScrollPane(reportsPanel),
+                "REPORTS"
+        );
+
         cardLayout.show(
                 contentPanel,
                 "DASHBOARD"
         );
 
     }
+    /*--------------------------------------------------
+                Event Registration
+ --------------------------------------------------*/
+
     private void registerEvents() {
 
-        statusBar.setStatus("Ready");
+        statusBar.setStatus("System Ready");
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+
+            @Override
+            public void windowOpened(java.awt.event.WindowEvent e) {
+
+                dashboardHomePanel.refreshDashboard();
+
+                statusBar.setStatus(
+                        "Dashboard Loaded Successfully"
+                );
+
+            }
+
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+
+                int option =
+                        JOptionPane.showConfirmDialog(
+
+                                DashboardFrame.this,
+
+                                "Are you sure you want to exit?",
+
+                                "Exit",
+
+                                JOptionPane.YES_NO_OPTION,
+
+                                JOptionPane.QUESTION_MESSAGE
+
+                        );
+
+                if (option == JOptionPane.YES_OPTION) {
+
+                    dispose();
+
+                } else {
+
+                    setDefaultCloseOperation(
+                            JFrame.DO_NOTHING_ON_CLOSE
+                    );
+
+                }
+
+            }
+
+        });
+
+    }
+    /*--------------------------------------------------
+              Refresh Dashboard
+ --------------------------------------------------*/
+
+    private void refreshDashboard() {
+
+        try {
+
+            dashboardHomePanel.refreshDashboard();
+
+            statusBar.setStatus("Dashboard Refreshed");
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Dashboard Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+        }
+
+    }
+    /*--------------------------------------------------
+                Change Module
+ --------------------------------------------------*/
+
+    private void showModule(String module) {
+
+        cardLayout.show(
+                contentPanel,
+                module
+        );
+
+        statusBar.setStatus(
+                module + " Loaded"
+        );
+
+    }
+    /*--------------------------------------------------
+                Public Methods
+ --------------------------------------------------*/
+
+    public void openDashboard() {
+
+        refreshDashboard();
+
+        showModule("DASHBOARD");
 
     }
 
+    public void openStudents() {
 
+        showModule("STUDENT");
+
+
+    }
+
+    public void openDepartments() {
+
+        showModule("DEPARTMENT");
+
+    }
+
+    public void openCourses() {
+
+        showModule("COURSE");
+
+    }
+
+    public void openFaculty() {
+
+        showModule("FACULTY");
+
+    }
+
+    public void openAttendance() {
+
+        showModule("ATTENDANCE");
+
+    }
+
+    public void openMarks() {
+
+        showModule("MARKS");
+
+    }
+
+    public void openReports() {
+
+        showModule("REPORTS");
+
+    }
+
+/*--------------------------------------------------
+                Dispose Resources
+ --------------------------------------------------*/
+
+    @Override
+    public void dispose() {
+
+        try {
+
+            if (dashboardHomePanel != null) {
+
+                dashboardHomePanel.refreshDashboard();
+
+            }
+
+        } catch (Exception ignored) {
+
+        }
+
+        super.dispose();
+
+    }
 }

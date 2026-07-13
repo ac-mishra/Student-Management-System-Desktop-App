@@ -130,6 +130,13 @@ public class StudentPanel extends JPanel {
                         .atZone(java.time.ZoneId.systemDefault())
                         .toLocalDate()
         );
+        student.setAdmissionDate(
+                formPanel
+                        .getAdmissionDate()
+                        .toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
+        );
 
         /*
          * Temporary value.
@@ -195,7 +202,13 @@ public class StudentPanel extends JPanel {
         student.setAddress(formPanel.getAddress());
 
         student.setStatus(formPanel.getStatus());
-
+        student.setDob(
+                formPanel
+                        .getDob()
+                        .toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
+        );
         student.setAdmissionDate(
                 formPanel
                         .getAdmissionDate()
@@ -204,7 +217,11 @@ public class StudentPanel extends JPanel {
                         .toLocalDate()
         );
 
-        student.setDepartmentId(1);
+        student.setDepartmentId(
+                formPanel
+                        .getDepartment()
+                        .getDepartmentId()
+        );
 
         if (controller.updateStudent(student)) {
 

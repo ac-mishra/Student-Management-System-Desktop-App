@@ -8,7 +8,11 @@ import org.example.dao.impl.MarksDAOImpl;
 import org.example.dao.impl.StudentDAOImpl;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.Vector;
+import org.example.util.ExcelExporter;
+import org.example.util.PdfExporter;
+
+import javax.swing.*;
+import java.io.File;
 
 public class ReportsController {
 
@@ -217,6 +221,121 @@ public class ReportsController {
         });
 
         return model;
+
+    }
+    public void exportExcel(JTable table) {
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setDialogTitle("Save Excel Report");
+
+        chooser.setSelectedFile(
+                new File("Report.xlsx")
+        );
+
+        int option = chooser.showSaveDialog(null);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+
+            File file = chooser.getSelectedFile();
+
+            if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+
+                file = new File(
+                        file.getAbsolutePath() + ".xlsx"
+                );
+
+            }
+
+            boolean exported =
+                    ExcelExporter.export(table, file);
+
+            if (exported) {
+
+                JOptionPane.showMessageDialog(
+
+                        null,
+
+                        "Excel exported successfully."
+
+                );
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+
+                        null,
+
+                        "Failed to export Excel.",
+
+                        "Export Error",
+
+                        JOptionPane.ERROR_MESSAGE
+
+                );
+
+            }
+
+        }
+
+    }
+    public void exportPDF(JTable table) {
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setDialogTitle("Save PDF Report");
+
+        chooser.setSelectedFile(
+                new File("Report.pdf")
+        );
+
+        int option = chooser.showSaveDialog(null);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+
+            File file = chooser.getSelectedFile();
+
+            if (!file.getName().toLowerCase().endsWith(".pdf")) {
+
+                file = new File(
+                        file.getAbsolutePath() + ".pdf"
+                );
+
+            }
+
+            boolean exported =
+                    PdfExporter.export(
+                            table,
+                            file.getAbsolutePath()
+                    );
+
+            if (exported) {
+
+                JOptionPane.showMessageDialog(
+
+                        null,
+
+                        "PDF exported successfully."
+
+                );
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+
+                        null,
+
+                        "Failed to export PDF.",
+
+                        "Export Error",
+
+                        JOptionPane.ERROR_MESSAGE
+
+                );
+
+            }
+
+        }
 
     }
 

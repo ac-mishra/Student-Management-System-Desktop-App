@@ -59,18 +59,17 @@ public class ExcelExporter {
 
             }
 
-            FileOutputStream out =
-                    new FileOutputStream(file);
+            try (FileOutputStream out = new FileOutputStream(file)) {
 
-            workbook.write(out);
+                workbook.write(out);
 
-            out.close();
+            }
 
             return true;
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.err.println("Excel Export Error : " + e.getMessage());
 
         }
 

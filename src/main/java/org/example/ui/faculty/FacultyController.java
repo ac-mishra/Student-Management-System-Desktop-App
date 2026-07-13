@@ -18,7 +18,7 @@ public class FacultyController {
 
     public List<Faculty> loadFaculties() {
 
-        return facultyService.getAllFaculties();
+        return facultyService.getAllFaculty();
 
     }
 

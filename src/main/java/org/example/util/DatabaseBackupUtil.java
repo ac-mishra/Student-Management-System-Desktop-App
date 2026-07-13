@@ -6,14 +6,14 @@ import java.io.IOException;
 public class DatabaseBackupUtil {
 
     private static final String MYSQL_BIN =
-            "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\";
+            "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin";
 
     private static final String USER = "root";
 
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "root";
 
     private static final String DATABASE =
-            "student_management";
+            "student_management_system";
 
     private DatabaseBackupUtil() {
     }
@@ -55,7 +55,7 @@ public class DatabaseBackupUtil {
 
         catch (Exception e) {
 
-            e.printStackTrace();
+            System.err.println(e.getMessage());
 
         }
 

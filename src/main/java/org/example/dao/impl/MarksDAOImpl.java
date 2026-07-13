@@ -83,12 +83,31 @@ public class MarksDAOImpl implements MarksDAO {
             ps.setDouble(6, marks.getTotalMarks());
             ps.setString(7, marks.getGrade());
             ps.setInt(8, marks.getMarksId());
+            System.out.println("Student ID : " + marks.getStudentId());
+
+            System.out.println("Course ID : " + marks.getCourseId());
+
+            System.out.println("Semester : " + marks.getSemester());
+
+            System.out.println("Internal : " + marks.getInternalMarks());
+
+            System.out.println("External : " + marks.getExternalMarks());
+
+            System.out.println("Total : " + marks.getTotalMarks());
+
+            System.out.println("Grade : " + marks.getGrade());
 
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
 
             e.printStackTrace();
+
+            System.out.println("SQL State : " + e.getSQLState());
+
+            System.out.println("Error Code : " + e.getErrorCode());
+
+            System.out.println("Message : " + e.getMessage());
 
         }
 

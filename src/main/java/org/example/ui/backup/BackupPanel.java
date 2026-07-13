@@ -1,12 +1,13 @@
 package org.example.ui.backup;
 
 import net.miginfocom.swing.MigLayout;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class BackupPanel extends JPanel {
 
+    private final BackupController controller =
+            new BackupController();
     public BackupPanel() {
 
         setLayout(new BorderLayout());
@@ -34,6 +35,9 @@ public class BackupPanel extends JPanel {
 
         JButton btnRestore =
                 new JButton("Restore Database");
+        btnBackup.addActionListener(e -> backupDatabase());
+
+        btnRestore.addActionListener(e -> restoreDatabase());
 
         panel.add(title);
 
@@ -44,6 +48,74 @@ public class BackupPanel extends JPanel {
                 "growx,h 45");
 
         add(panel, BorderLayout.CENTER);
+
+    }
+    private void backupDatabase() {
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setSelectedFile(
+                new java.io.File("backup.sql")
+        );
+
+        int option = chooser.showSaveDialog(this);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+
+            boolean success =
+                    controller.backupDatabase(
+                            chooser.getSelectedFile()
+                    );
+
+            JOptionPane.showMessageDialog(
+
+                    this,
+
+                    success
+                            ? "Backup completed successfully."
+                            : "Backup failed.",
+
+                    "Backup",
+
+                    success
+                            ? JOptionPane.INFORMATION_MESSAGE
+                            : JOptionPane.ERROR_MESSAGE
+
+            );
+
+        }
+
+    }
+    private void restoreDatabase() {
+
+        JFileChooser chooser = new JFileChooser();
+
+        int option = chooser.showOpenDialog(this);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+
+            boolean success =
+                    controller.restoreDatabase(
+                            chooser.getSelectedFile()
+                    );
+
+            JOptionPane.showMessageDialog(
+
+                    this,
+
+                    success
+                            ? "Database restored successfully."
+                            : "Restore failed.",
+
+                    "Restore",
+
+                    success
+                            ? JOptionPane.INFORMATION_MESSAGE
+                            : JOptionPane.ERROR_MESSAGE
+
+            );
+
+        }
 
     }
 

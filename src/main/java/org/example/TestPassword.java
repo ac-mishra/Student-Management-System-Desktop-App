@@ -6,9 +6,7 @@ public class TestPassword {
 
     public static void main(String[] args) {
 
-        System.out.println(
-                PasswordUtil.hashPassword("admin123")
-        );
+        System.out.println(PasswordUtil.encrypt("admin"));
 
     }
 

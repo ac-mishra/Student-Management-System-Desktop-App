@@ -69,7 +69,7 @@ public class PdfExporter {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.err.println("PDF Export Error : " + e.getMessage());
 
         }
 

@@ -120,37 +120,78 @@ public class ReportsPanel extends JPanel {
 
             } catch (Exception ex) {
 
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(
+
+                        this,
+
+                        ex.getMessage(),
+
+                        "Print Error",
+
+                        JOptionPane.ERROR_MESSAGE
+
+                );
 
             }
 
         });
 
-        btnExportExcel.addActionListener(e ->
+        btnExportExcel.addActionListener(e -> {
+
+            try {
+
+                controller.exportExcel(table);
+
+            } catch (Exception ex) {
 
                 JOptionPane.showMessageDialog(
+
                         this,
-                        "Excel Export Coming Soon"
-                )
 
-        );
+                        ex.getMessage(),
 
-        btnExportPDF.addActionListener(e ->
+                        "Excel Export Error",
+
+                        JOptionPane.ERROR_MESSAGE
+
+                );
+
+            }
+
+        });
+
+        btnExportPDF.addActionListener(e -> {
+
+            try {
+
+                controller.exportPDF(table);
+
+            } catch (Exception ex) {
 
                 JOptionPane.showMessageDialog(
-                        this,
-                        "PDF Export Coming Soon"
-                )
 
-        );
+                        this,
+
+                        ex.getMessage(),
+
+                        "PDF Export Error",
+
+                        JOptionPane.ERROR_MESSAGE
+
+                );
+
+            }
+
+        });
 
     }
 
     private void loadReport() {
 
         String report =
-                (String) cmbReport.getSelectedItem();
-
+                String.valueOf(
+                        cmbReport.getSelectedItem()
+                );
         switch (report) {
 
             case "Students" ->
